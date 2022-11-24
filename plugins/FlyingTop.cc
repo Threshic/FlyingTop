@@ -1479,13 +1479,11 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       // double pz = tk.pz();
       //------Propagation with new interface --> See ../interface/PropaHitPattern.h-----//
       PropaHitPattern* PHP = new PropaHitPattern();
-      //Only the disk's part is working, barrel part is bugged somehow
       std::pair<int,GloballyPositioned<float>::PositionType> FHPosition = PHP->Main(firsthit,Prop,Surtraj,Eta,Phi,vz,P3D2,B3DV);
       tree_track_firstHit_x.push_back(FHPosition.second.x());
       tree_track_firstHit_y.push_back(FHPosition.second.y());
       tree_track_firstHit_z.push_back(FHPosition.second.z());
       tree_track_region.push_back(FHPosition.first);
-      std::cout<<"hitpattern  // region"<<firsthit<<" // : "<<FHPosition.first<<std::endl;//the print gives good information. THe way the trees are filled is wrong  iguess...
       count+=1;
       //-----------------------END OF MINIAOD firsthit-----------------------//
 
