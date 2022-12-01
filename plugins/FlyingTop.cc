@@ -107,6 +107,8 @@
               //----------------New interface----------------------//
 #include "../interface/PropaHitPattern.h"
 //------------------------------End of Paul------------------------//
+
+
 //
 // class declaration
 //
@@ -188,12 +190,12 @@ class FlyingTopAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>
     //--------------------------------
   
     int   tree_nPV;
-    float tree_PV_x;
-    float tree_PV_y;
-    float tree_PV_z;
-    float tree_PV_ez;
-    float tree_PV_NChi2;
-    float tree_PV_ndf;
+    std::vector<float> tree_PV_x;
+    std::vector<float> tree_PV_y;
+    std::vector<float> tree_PV_z;
+    std::vector<float> tree_PV_ez;
+    std::vector<float> tree_PV_NChi2;
+    std::vector<float> tree_PV_ndf;
     
     std::vector<float> tree_vtx_PosX;
     std::vector<float> tree_vtx_PosY;
@@ -268,7 +270,7 @@ class FlyingTopAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>
     std::vector<float>    tree_track_dz;  // with respect to PV
     std::vector<float>    tree_track_dzError;
 //     std::vector<unsigned int>    tree_track_originalAlgo; // definition as comments at the end of the file,
-//     //http://cmsdoxygen.web.cern.ch/cmsdoxygen/CMSSW_10_1_3/doc/html/d8/df2/classreco_1_1TrackBase.html#aca7611bd1a33d535cefc72b6e497ece8
+//     http://cmsdoxygen.web.cern.ch/cmsdoxygen/CMSSW_10_1_3/doc/html/d8/df2/classreco_1_1TrackBase.html#aca7611bd1a33d535cefc72b6e497ece8
     std::vector<unsigned int>    tree_track_algo;
 //     std::vector<unsigned short>  tree_track_stopReason;
     std::vector< float>  tree_track_drSig;
@@ -280,7 +282,7 @@ class FlyingTopAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>
     std::vector<int>      tree_track_nHitTEC;
     std::vector<int>      tree_track_nHitPXB;
     std::vector<int>      tree_track_nHitPXF;
-//$$    std::vector<int>      tree_track_isHitL1;
+//     std::vector<int>      tree_track_isHitL1;
     std::vector<int>      tree_track_isHitPixel;
     std::vector<int>      tree_track_nLayers;
     std::vector<int>      tree_track_nLayersPixel;
@@ -290,19 +292,18 @@ class FlyingTopAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>
     std::vector< float >  tree_track_y;
     std::vector< float >  tree_track_z;
     std::vector< int >    tree_track_firstHit;
-    std::vector< int >  tree_track_hitpattern;
+    std::vector< int >    tree_track_hitpattern;
     std::vector< float >  tree_track_firstHit_x;
     std::vector< float >  tree_track_firstHit_y;
     std::vector< float >  tree_track_firstHit_z;
     std::vector< int >    tree_track_iJet;
 //     std::vector<int>    tree_track_recoVertex_idx;
     std::vector<float>    tree_track_region;
-    std::vector<float>  tree_track_ntrk10;
-    std::vector<float>  tree_track_ntrk20;
-    std::vector<float>  tree_track_ntrk30;
+    std::vector<float>    tree_track_ntrk10;
+    std::vector<float>    tree_track_ntrk20;
+    std::vector<float>    tree_track_ntrk30;
     std::vector< double > tree_track_MVAval;
     
-
     std::vector< int >    tree_track_Hemi;
     std::vector< double > tree_track_Hemi_dR;
     std::vector< double > tree_track_Hemi_mva_NChi2;
@@ -409,7 +410,6 @@ class FlyingTopAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>
     // generated LLPs 
     //-----------------------
     int   tree_nLLP = -1;
-
     std::vector< int >   tree_LLP;
     std::vector< float > tree_LLP_pt;
     std::vector< float > tree_LLP_eta;
@@ -469,7 +469,9 @@ class FlyingTopAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>
 // constructors and destructor
 //
 FlyingTopAnalyzer::FlyingTopAnalyzer(const edm::ParameterSet& iConfig):
-    weightFile_(                                                 iConfig.getUntrackedParameter<std::string>("weightFileMVA") ),   
+
+    weightFile_( iConfig.getUntrackedParameter<std::string>("weightFileMVA") ),  
+
     prunedGenToken_(consumes<edm::View<reco::GenParticle> >(     iConfig.getParameter<edm::InputTag>("genpruned"))),
     packedGenToken_(consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("genpacked"))),
     vertexToken_(   consumes<reco::VertexCollection>(            iConfig.getParameter<edm::InputTag>("vertices"))),
@@ -574,7 +576,7 @@ FlyingTopAnalyzer::FlyingTopAnalyzer(const edm::ParameterSet& iConfig):
     smalltree->Branch("tree_track_algo",             &tree_track_algo);
 //     smalltree->Branch("tree_track_stopReason",       &tree_track_stopReason);
     smalltree->Branch("tree_track_drSig", &tree_track_drSig);
-    smalltree->Branch("tree_track_nhits",         &tree_track_nhits);
+    smalltree->Branch("tree_track_nhits",        &tree_track_nhits);
     smalltree->Branch("tree_track_nHitPixel",    &tree_track_nHitPixel);
     smalltree->Branch("tree_track_nHitTIB",      &tree_track_nHitTIB);
     smalltree->Branch("tree_track_nHitTID",      &tree_track_nHitTID);
@@ -592,12 +594,12 @@ FlyingTopAnalyzer::FlyingTopAnalyzer(const edm::ParameterSet& iConfig):
     smalltree->Branch("tree_track_y",            &tree_track_y );
     smalltree->Branch("tree_track_z",            &tree_track_z );
     smalltree->Branch("tree_track_firstHit",     &tree_track_firstHit);
-    smalltree->Branch("tree_track_hitpattern",&tree_track_hitpattern);
+    smalltree->Branch("tree_track_hitpattern",   &tree_track_hitpattern);
     smalltree->Branch("tree_track_firstHit_x",   &tree_track_firstHit_x);
     smalltree->Branch("tree_track_firstHit_y",   &tree_track_firstHit_y);
     smalltree->Branch("tree_track_firstHit_z",   &tree_track_firstHit_z);
     smalltree->Branch("tree_track_iJet",         &tree_track_iJet);
-    smalltree->Branch("tree_track_region",&tree_track_region);
+    smalltree->Branch("tree_track_region",       &tree_track_region);
     smalltree->Branch("tree_track_ntrk10",       &tree_track_ntrk10);
     smalltree->Branch("tree_track_ntrk20",       &tree_track_ntrk20);
     smalltree->Branch("tree_track_ntrk30",       &tree_track_ntrk30);
@@ -662,7 +664,7 @@ FlyingTopAnalyzer::FlyingTopAnalyzer(const edm::ParameterSet& iConfig):
     smalltree->Branch("tree_genFromLLP_mother_pdgId" , &tree_genFromLLP_mother_pdgId);
     smalltree->Branch("tree_genFromLLP_isFromB" ,      &tree_genFromLLP_isFromB);
     smalltree->Branch("tree_genFromLLP_isFromC" ,      &tree_genFromLLP_isFromC);
-    smalltree->Branch("tree_genAxis_dRneuneu",&tree_genAxis_dRneuneu);
+    smalltree->Branch("tree_genAxis_dRneuneu",       &tree_genAxis_dRneuneu);
     smalltree->Branch("tree_nFromC",                 &tree_nFromC,  "tree_nFromC/I");
     smalltree->Branch("tree_genFromC_pt"  ,          &tree_genFromC_pt);
     smalltree->Branch("tree_genFromC_eta" ,          &tree_genFromC_eta);
@@ -833,12 +835,12 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
 //   }
   tree_nPV = primaryVertex->size();
   if ( !primaryVertex->empty() ) {
-    tree_PV_x     = (*primaryVertex)[0].x(); // l'index 0 donne le PV!
-    tree_PV_y     = (*primaryVertex)[0].y();
-    tree_PV_z     = (*primaryVertex)[0].z();
-    tree_PV_ez    = (*primaryVertex)[0].zError();
-    tree_PV_NChi2 = (*primaryVertex)[0].normalizedChi2();
-    tree_PV_ndf   = (*primaryVertex)[0].ndof();
+    tree_PV_x.push_back( (*primaryVertex)[0].x()); // l'index 0 donne le PV!
+    tree_PV_y.push_back(     (*primaryVertex)[0].y());
+    tree_PV_z.push_back(     (*primaryVertex)[0].z());
+    tree_PV_ez.push_back(    (*primaryVertex)[0].zError());
+    tree_PV_NChi2.push_back( (*primaryVertex)[0].normalizedChi2());
+    tree_PV_ndf.push_back(   (*primaryVertex)[0].ndof());
   }
   const reco::Vertex &PV = primaryVertex->front();
 
@@ -1117,27 +1119,6 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
         tree_genFromLLP_pdgId.push_back(     pack_pdgId);
         tree_genFromLLP_mass.push_back(      (*packed)[j].mass());
         const Candidate * momj =	     (*packed)[j].mother(0);
-//$$$$
-//         if ( momj ) {
-//           tree_genFromLLP_mother_pdgId.push_back(momj->pdgId());
-// 	  float vx = momj->vx();
-// 	  float vy = momj->vy();
-// 	  float vz = momj->vz();
-//           if ( momj->numberOfDaughters() > 0 ) { // always the case a priori
-// 	    vx = momj->daughter(0)->vx();
-// 	    vy = momj->daughter(0)->vy();
-// 	    vz = momj->daughter(0)->vz();
-// 	  }
-//           tree_genFromLLP_x.push_back( vx );
-//           tree_genFromLLP_y.push_back( vy );
-//           tree_genFromLLP_z.push_back( vz );
-// 	}
-//         else {                                   // never the case a priori
-//           tree_genFromLLP_mother_pdgId.push_back(-9999);
-//           tree_genFromLLP_x.push_back(-10);
-//           tree_genFromLLP_y.push_back(-10);
-//           tree_genFromLLP_z.push_back(-10);
-//         }
 
         int mom_pdgid = -9999;
 	float vx = -10., vy = -10., vz = -10.;
@@ -1156,7 +1137,6 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
         tree_genFromLLP_x.push_back( vx );
         tree_genFromLLP_y.push_back( vy );
         tree_genFromLLP_z.push_back( vz );
-//$$$$
 
         // match to final b hadron
 	bool matchB = false;
@@ -1319,7 +1299,7 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
   if ( !tree_muon_isGlobal[mu] ) continue;
     mupt1  = tree_muon_pt[mu];
   if ( mupt1 < 10. ) continue; // Zmu filter
-//$$$$  if ( abs(tree_muon_dxy[mu]) > 0.1 || abs(tree_muon_dz[mu]) > 0.2 ) continue; // muons closed to PV
+//$$  if ( abs(tree_muon_dxy[mu]) > 0.1 || abs(tree_muon_dz[mu]) > 0.2 ) continue; // muons closed to PV
     mueta1 = tree_muon_eta[mu];
     muphi1 = tree_muon_phi[mu];
     v1.SetPtEtaPhiM(mupt1,mueta1,muphi1,mu_mass);
@@ -1327,7 +1307,7 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
     {	    
     if ( !tree_muon_isGlobal[mu2] ) continue;
     if ( tree_muon_charge[mu] == tree_muon_charge[mu2] ) continue;
-//$$$$    if ( abs(tree_muon_dxy[mu2]) > 0.1 || abs(tree_muon_dz[mu2]) > 0.2 ) continue;
+//$$    if ( abs(tree_muon_dxy[mu2]) > 0.1 || abs(tree_muon_dz[mu2]) > 0.2 ) continue;
       mupt2  = tree_muon_pt[mu2];
     if ( mupt2 < 10. ) continue;
     if ( mupt1 < 28. && mupt2 < 28. ) continue; // Zmu Filter
@@ -1365,7 +1345,7 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
   
 
   edm::ESHandle<TransientTrackBuilder> theTransientTrackBuilder;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTransientTrackBuilder);//Asking for reco colelction of PV..
+  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTransientTrackBuilder); // Asking for reco colelction of PV..
   vector<reco::TransientTrack> BestTracks;
   std::vector<std::pair<uint16_t,float> > Players;
   int count =0;
@@ -1386,7 +1366,6 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
     // and
     // from /DQM/TrackingMonitor/src/PackedCandidateTrackValidator.cc
 
-//$$$$
     for (unsigned int ipc = 0; ipc < pc->size(); ipc++) {
       const pat::PackedCandidate& pfCand = pc->at(ipc);
       pat::PackedCandidateRef pcref = pat::PackedCandidateRef(pcs, ipc);
@@ -1403,7 +1382,7 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       float tk_phi = tk.phi();
 
     if ( tk_nHit == 0 ) continue;
-    if ( tk_charge == 0 || tk_pt < 1. ) continue;
+    if ( tk_charge == 0 || tk_pt < 1. || abs(tk_eta)>2.4 ) continue;
 
       tree_nTracks++; 
       tree_track_pt.push_back           (tk_pt);
@@ -1411,19 +1390,19 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       tree_track_phi.push_back          (tk_phi);
       tree_track_charge.push_back       (tk_charge);
       tree_track_NChi2.push_back        (tk.normalizedChi2());
-//$$      tree_track_dxy.push_back          (tk.dxy((*primaryVertex)[0].position()));
+//      tree_track_dxy.push_back          (tk.dxy((*primaryVertex)[0].position()));
       tree_track_dxy.push_back          (tk.dxy(PV.position()));
       tree_track_dxyError.push_back     (tk.dxyError());
-//$$      tree_track_dz.push_back           (tk.dz((*primaryVertex)[0].position()));
+//       tree_track_dz.push_back           (tk.dz((*primaryVertex)[0].position()));
       tree_track_dz.push_back           (tk.dz(PV.position()));
       tree_track_dzError.push_back      (tk.dzError());
 //       tree_track_originalAlgo.push_back   (tk.originalAlgo());
-      tree_track_algo.push_back           (tk.algo());
+      tree_track_algo.push_back         (tk.algo());
 //       tree_track_stopReason.push_back     (tk.stopReason());
       tree_track_isHighPurity.push_back (static_cast<int>(tk.quality(reco::TrackBase::highPurity)));
 //       tree_track_isLoose.push_back        (static_cast<int>(tk.quality(reco::TrackBase::loose)));
 //       tree_track_isTight.push_back        (static_cast<int>(tk.quality(reco::TrackBase::tight)));
-      tree_track_nhits.push_back         (tk_nHit);
+      tree_track_nhits.push_back        (tk_nHit);
       tree_track_nHitPixel.push_back    (tk.hitPattern().numberOfValidPixelHits());
       tree_track_nHitTIB.push_back      (tk.hitPattern().numberOfValidStripTIBHits());
       tree_track_nHitTID.push_back      (tk.hitPattern().numberOfValidStripTIDHits());
@@ -1432,7 +1411,7 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       tree_track_nHitPXB.push_back      (tk.hitPattern().numberOfValidPixelBarrelHits());
       tree_track_nHitPXF.push_back      (tk.hitPattern().numberOfValidPixelEndcapHits());
 
-//$$      tree_track_isHitL1.push_back      (tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::SubDetector::PixelBarrel, 1));
+//       tree_track_isHitL1.push_back      (tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::SubDetector::PixelBarrel, 1));
       int hitPixelLayer = 0;
       if ( tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::SubDetector::PixelBarrel, 1) ) hitPixelLayer += 1;
       if ( tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::SubDetector::PixelBarrel, 2) ) hitPixelLayer += 10;
@@ -1443,14 +1422,13 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       if ( tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::SubDetector::PixelEndcap, 3) ) hitPixelLayer += 200;
       tree_track_isHitPixel.push_back( hitPixelLayer );
 
-
       tree_track_nLayers.push_back      (tk.hitPattern().trackerLayersWithMeasurement());
       tree_track_nLayersPixel.push_back (tk.hitPattern().pixelLayersWithMeasurement());
 //       tree_track_nLostHit.push_back     (tk.hitPattern().numberOfLostHits(MISSING_INNER_HITS)+tk.hitPattern().numberOfLostHits(MISSING_OUTER_HITS));
       tree_track_x.push_back            (tk.vx());
       tree_track_y.push_back            (tk.vy());
       tree_track_z.push_back            (tk.vz());
-      tree_track_firstHit.push_back     (pfCand.firstHit());
+      tree_track_firstHit.push_back     (pfCand.firstHit()); // only defined for track pT > 1
        //----------------MINIAOD_Firsthit-----------//
                   //-----------------IMPORTANT----------------//
                   // BestTracks seems to be destructed somehow//
@@ -1461,18 +1439,18 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       //-----hitpattern -> Database ---/
       const HitPattern hp = tk.hitPattern();
       uint16_t firsthit = hp.getHitPattern(HitPattern::HitCategory::TRACK_HITS,0);
-      tree_track_hitpattern.push_back(firsthit);
+      tree_track_hitpattern.push_back(firsthit); // defined for any track pT
 
       //---Creating State to propagate from  TT---//
       BestTracks.push_back(theTransientTrackBuilder->build(tk));
-      const MagneticField* B = BestTracks[count].field();//3.8T
+      const MagneticField* B = BestTracks[count].field(); // 3.8T
       reco::TransientTrack TT (tk,BestTracks[count].field());
-      // const FreeTrajectoryState Freetraj = TT.initialFreeState();//Propagator in the barrel can also use FTS (WARNING: the so-called reference point (where the propagation starts might be different from the first vtx, a check should be done))
-      GlobalPoint vert (tk.vx(),tk.vy(),tk.vz());//Point where the propagation will start (Reference Point)
-      const TrajectoryStateOnSurface Surtraj = TT.stateOnSurface(vert);//TSOS of this point
-      AnalyticalPropagator* Prop = new AnalyticalPropagator(B);//Propagator that will be used for barrel, crashes in the disks when using Plane
-      Basic3DVector<float> P3D2(tk.vx(),tk.vy(),tk.vz());//global frame
-      Basic3DVector<float> B3DV (tk.px(),tk.py(),tk.pz());//global frame 
+      // const FreeTrajectoryState Freetraj = TT.initialFreeState(); // Propagator in the barrel can also use FTS (WARNING: the so-called reference point (where the propagation starts might be different from the first vtx, a check should be done))
+      GlobalPoint vert (tk.vx(),tk.vy(),tk.vz()); // Point where the propagation will start (Reference Point)
+      const TrajectoryStateOnSurface Surtraj = TT.stateOnSurface(vert); // TSOS of this point
+      AnalyticalPropagator* Prop = new AnalyticalPropagator(B); // Propagator that will be used for barrel, crashes in the disks when using Plane
+      Basic3DVector<float> P3D2(tk.vx(),tk.vy(),tk.vz());  // global frame
+      Basic3DVector<float> B3DV (tk.px(),tk.py(),tk.pz()); // global frame 
       float Eta = tk.eta();
       float Phi = tk.phi();
       float vz  = tk.vz();
@@ -1486,7 +1464,6 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       tree_track_region.push_back(FHPosition.first);
       count+=1;
       //-----------------------END OF MINIAOD firsthit-----------------------//
-
 
       // track association to jet
       int iJet = 0;
@@ -1521,13 +1498,6 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       for (int k = 0; k < tree_ngenFromLLP; k++) // loop on final gen part from LLP
       {
       if ( tk.charge() != tree_genFromLLP_charge[k] ) continue;
-//$$$$	
-// 	float dpt  = abs( tk_pt / tree_genFromLLP_pt[k] - 1. );
-// 	float deta = abs( tk_eta - tree_genFromLLP_eta[k] );
-// 	float dphi = abs( Deltaphi( tk_phi, tree_genFromLLP_phi[k] ) );
-//         if ( !matchTOgen &&
-// 	     abs(deta) < 0.1 && abs(dphi) < 0.1 && abs(dpt) < 0.1 ) {
-//           matchTOgen = true;
 
         float qGen   = tree_genFromLLP_charge[k];
         float ptGen  = tree_genFromLLP_pt[k];
@@ -1563,7 +1533,6 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
         }
 
 	if ( matchTOgen ) {
-//$$$$	
           track_sim_LLP =     tree_genFromLLP_LLP[k];
           track_sim_isFromB = tree_genFromLLP_isFromB[k];
           track_sim_isFromC = tree_genFromLLP_isFromC[k];
@@ -1576,9 +1545,7 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
           track_sim_x =	      tree_genFromLLP_x[k];
           track_sim_y =	      tree_genFromLLP_y[k];
           track_sim_z =	      tree_genFromLLP_z[k];
-//$$$$	
           break;
-//$$$$	
 	}
       } // end loop on final gen part from LLP
       tree_track_sim_LLP.push_back(	  track_sim_LLP );
@@ -1596,8 +1563,6 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
     } // end loop on packed candidates
 
-//  } // endif HT filter
-//$$
 
    /////////////////////////////////////////////////////////
     //-------------------------------------------------------
@@ -1673,7 +1638,7 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
     float dRcut_hemis  = 1.5; // subjective choice
     float dRcut_tracks = 10.; // no cut is better (could bias low track pT and high LLP ct) 
      
-    for (int i=0; i<jetidx; i++) // Loop on jet, //FIXME
+    for (int i=0; i<jetidx; i++) // Loop on jet
     {
     if ( !isjet[i] ) continue;
       // float jet_pt  = vjet[i].Pt();
@@ -1682,7 +1647,7 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
       if ( njet1 > 0 ) dR1 = Deltar( jet_eta, jet_phi, vaxis1.Eta(), vaxis1.Phi() );
       if ( njet2 > 0 ) dR2 = Deltar( jet_eta, jet_phi, vaxis2.Eta(), vaxis2.Phi() );
       // axis 1
-      if ( njet1 > 0 && !isjet2[i]  && dR1 < dRcut_hemis) {	     //
+      if ( njet1 > 0 && !isjet2[i]  && dR1 < dRcut_hemis) {
         njet1++;
         vaxis1 += vjet[i];
         isjet1[i] = true;
@@ -1742,6 +1707,7 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
         // cout << " axis1_phi " << axis1_phi << " and axis2_phi" << axis2_phi << endl;
         // cout << " axis1_dR " << axis1_dR << " and axis2_dR" << axis2_dR << endl;
         // cout << " dR_axis12 " << dR_axis12 << endl;
+
     ///////////////////////////////////////////////////////
     //-----------------------------------------------------
     //selection of displaced tracks
@@ -1756,18 +1722,18 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
     // float dptSig; /*!*/
     int jet; /*!*/
     float ntrk10, ntrk20, ntrk30; /*!*/
-    float firsthit_X, firsthit_Y, firsthit_Z, dxy, dxyError, pt, eta,phi, NChi2, nhits, algo;
+    float firsthit_X, firsthit_Y, firsthit_Z, dxy, dxyError, pt, eta, phi, NChi2, nhits, algo;
     // float  track_dR;
     // float track_dRmax ; /*!*/
     double bdtval = -100.;
 
     int nTrks_axis1 = 0;
-    // int nTrks_axis1_sig=0, nTrks_axis1_bad=0;
+    int nTrks_axis1_sig=0, nTrks_axis1_bad=0;
     int nTrks_axis2 = 0;
-    // int nTrks_axis2_sig=0, nTrks_axis2_bad=0;
+    int nTrks_axis2_sig=0, nTrks_axis2_bad=0;
 
-    // int nTrks_axis1_sig_mva=0, nTrks_axis1_bad_mva=0;
-    // int nTrks_axis2_sig_mva=0, nTrks_axis2_bad_mva=0;
+    int nTrks_axis1_sig_mva=0, nTrks_axis1_bad_mva=0;
+    int nTrks_axis2_sig_mva=0, nTrks_axis2_bad_mva=0;
     
     TMVA::Reader *reader = new TMVA::Reader( "!Color:!Silent" );
 
@@ -1810,11 +1776,11 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
     {
       pat::PackedCandidateRef pcref = pat::PackedCandidateRef(pcs, ipc);
       const reco::Track *trackPcPtr = pcref->bestTrack();
-      if( !trackPcPtr ) continue;//happens (~5%) 
+      if( !trackPcPtr ) continue; // happens (~5%) 
       const reco::Track& trackPc = *trackPcPtr;
       if ( trackPc.hitPattern().numberOfValidHits() == 0 ) continue;
 
-      if ( trackPc.charge() == 0 || trackPc.pt() < 1. ) continue;
+      if ( trackPc.charge() == 0 || trackPc.pt() < 1. || abs(trackPc.eta())>2.4) continue;
     // for (size_t iTrack = 0; iTrack<trackRefs.size(); ++iTrack)  // Loop on all the tracks
     // {
       counter_track++;
@@ -1848,16 +1814,11 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
 //$$
       if ( pt > pt_Cut && NChi2 < NChi2_Cut && drSig > drSig_Cut ) // preselection : pt > 1. && NChi2 < 5. && drSig > 5.
 //$$
-      { // On regarde les track_selec[i] qui sont True donc de potentielles tracks secondaires
-        
-
-        //-----------------------------------------------FIXME---------------//
-        jet = tree_track_iJet[counter_track]; /*!*/
+      {
+        jet = tree_track_iJet[counter_track];
         isinjet = 0.;
         if ( jet >= 0 ) isinjet = 1.; /*!*/
-        // int isFromLLP    = tree_track_sim_LLP[counter_track];//FIXME
-        //--------------------------------------------------------------------//
-
+        int isFromLLP    = tree_track_sim_LLP[counter_track];
 
         //check the dR between the tracks and the second axis (without any selection on the tracks)
         float dR1  = Deltar( eta, phi, axis1_eta, axis1_phi ); // axis1_phi and axis1_eta for the first axis
@@ -1875,6 +1836,13 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
         // {
               for (unsigned int ipc2 = 0; ipc2 < pc->size(); ipc2++) 
     {
+            pat::PackedCandidateRef pcref2 = pat::PackedCandidateRef(pcs, ipc2);
+      const reco::Track *trackPcPtr2 = pcref2->bestTrack();
+      if ( !trackPcPtr2 ) continue; // happens (~5%) 
+      const reco::Track& trackPc2 = *trackPcPtr2;
+      if ( trackPc2.hitPattern().numberOfValidHits() == 0 ) continue;
+
+      if ( trackPc2.charge() == 0 || trackPc2.pt() < 1. || abs(trackPc2.eta())>2.4 ) continue;
           counter_othertrack++;
           if ( counter_othertrack == counter_track ) continue;
           float pt2  = tree_track_pt[counter_othertrack];
@@ -1896,48 +1864,48 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
 
         if ( dR < dRcut_tracks ) 
 	{
-	  // if ( isFromLLP == 1 ) LLP1_nTrks++;
-	  // if ( isFromLLP == 2 ) LLP2_nTrks++;
+	  if ( isFromLLP == 1 ) LLP1_nTrks++;
+	  if ( isFromLLP == 2 ) LLP2_nTrks++;
 	
           bdtval = reader->EvaluateMVA( "BDTG" ); //default value = -10 (no -10 observed and -999 comes from EvaluateMVA)
           //cout << "BDT VAL " << bdtval <<endl;
 
-      //     if ( tracks_axis == 1 ) {
-	    // nTrks_axis1++;
-      //       if ( isFromLLP == iLLPrec1 ) nTrks_axis1_sig++;
-      //       else if ( isFromLLP >= 1 )   nTrks_axis1_bad++;
-      //     }
+          if ( tracks_axis == 1 ) {
+	    nTrks_axis1++;
+            if ( isFromLLP == iLLPrec1 ) nTrks_axis1_sig++;
+            else if ( isFromLLP >= 1 )   nTrks_axis1_bad++;
+          }
         
-      //     if ( tracks_axis == 2 ) {
-	    // nTrks_axis2++;
-      //       if ( isFromLLP == iLLPrec2 ) nTrks_axis2_sig++;
-      //       else if ( isFromLLP >= 1 )   nTrks_axis2_bad++;
-      //     }
+          if ( tracks_axis == 2 ) {
+	    nTrks_axis2++;
+            if ( isFromLLP == iLLPrec2 ) nTrks_axis2_sig++;
+            else if ( isFromLLP >= 1 )   nTrks_axis2_bad++;
+          }
         
           if ( bdtval > bdtcut )      //optimal cut for 50 cm ,trained on 10k events //Paul, expected to change
           { 
             ////--------------Control tracks-----------------////
-            // if ( isFromLLP == 1 )
-            // {
-            //   displacedTracks_llp1_mva.push_back(theTransientTrackBuilder->build(trackPcPtr));
-            // }
-            // if ( isFromLLP == 2 )
-            // {
-            //   displacedTracks_llp2_mva.push_back(theTransientTrackBuilder->build(trackPcPtr));
-            // }
+            if ( isFromLLP == 1 )
+            {
+              displacedTracks_llp1_mva.push_back(theTransientTrackBuilder->build(trackPcPtr));
+            }
+            if ( isFromLLP == 2 )
+            {
+              displacedTracks_llp2_mva.push_back(theTransientTrackBuilder->build(trackPcPtr));
+            }
 
             if ( tracks_axis == 1 )
             {
               displacedTracks_Hemi1_mva.push_back(theTransientTrackBuilder->build(trackPcPtr));
-              // if ( isFromLLP == iLLPrec1 ) nTrks_axis1_sig_mva++;
-              // else if ( isFromLLP >= 1 )   nTrks_axis1_bad_mva++;
+              if ( isFromLLP == iLLPrec1 ) nTrks_axis1_sig_mva++;
+              else if ( isFromLLP >= 1 )   nTrks_axis1_bad_mva++;
             }
  
             if ( tracks_axis == 2 )
             {
               displacedTracks_Hemi2_mva.push_back(theTransientTrackBuilder->build(trackPcPtr));
-              // if ( isFromLLP == iLLPrec2 ) nTrks_axis2_sig_mva++;
-              // else if ( isFromLLP >= 1 )   nTrks_axis2_bad_mva++;
+              if ( isFromLLP == iLLPrec2 ) nTrks_axis2_sig_mva++;
+              else if ( isFromLLP >= 1 )   nTrks_axis2_bad_mva++;
             }
           }
         }
@@ -1983,6 +1951,104 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
     double ratio           = 0.25;
 // $$
 
+//------------------------------- FIRST LLP WITH MVA ----------------------------------//
+    
+//$$    KalmanVertexFitter theFitter_vertex_llp1_mva(kvfPSet); //One or less vertex: either Valid or NotValid /*!*/
+//$$
+    static AdaptiveVertexFitter 
+    theFitter_vertex_llp1_mva(
+                 GeometricAnnealing ( sigmacut, Tini, ratio ), 
+                 DefaultLinearizationPointFinder(),
+                 KalmanVertexUpdator<5>(), 
+                 KalmanVertexTrackCompatibilityEstimator<5>(), 
+                 KalmanVertexSmoother() );
+    theFitter_vertex_llp1_mva.setParameters ( maxshift, maxlpshift, maxstep, weightThreshold );
+//$$
+    
+    Vtx_ntk = displacedTracks_llp1_mva.size();
+    Vtx_x = -100.;
+    Vtx_y = -100.;
+    Vtx_z = -100.;
+    Vtx_chi = -1.;
+    
+    if ( Vtx_ntk > 1 )
+    {
+      TransientVertex displacedVertex_llp1_mva = theFitter_vertex_llp1_mva.vertex(displacedTracks_llp1_mva); // fitted vertex
+      
+      // std::cout<< "displacedVertex_llp1_mva is built" << std::endl;
+      
+      if ( displacedVertex_llp1_mva.isValid() ) // NotValid if the max number of steps has been exceded or the fitted position is out of tracker bounds.
+      {
+        Vtx_ntk = displacedTracks_llp1_mva.size();
+        Vtx_x = displacedVertex_llp1_mva.position().x();
+        Vtx_y = displacedVertex_llp1_mva.position().y();
+        Vtx_z = displacedVertex_llp1_mva.position().z();
+        Vtx_chi = displacedVertex_llp1_mva.normalisedChiSquared();
+      }
+    }
+
+    tree_LLP.push_back(1);
+    tree_LLP_pt.push_back(   LLP1_pt);
+    tree_LLP_eta.push_back(  LLP1_eta);
+    tree_LLP_phi.push_back(  LLP1_phi);
+    tree_LLP_x.push_back(    LLP1_x);
+    tree_LLP_y.push_back(    LLP1_y);
+    tree_LLP_z.push_back(    LLP1_z);
+    tree_LLP_nTrks.push_back(LLP1_nTrks);
+    tree_LLP_Vtx_nTrks.push_back(Vtx_ntk);
+    tree_LLP_Vtx_NChi2.push_back(Vtx_chi);
+    tree_LLP_Vtx_dx.push_back(Vtx_x - LLP1_x);
+    tree_LLP_Vtx_dy.push_back(Vtx_y - LLP1_y);
+    tree_LLP_Vtx_dz.push_back(Vtx_z - LLP1_z);
+
+
+    //-------------------------- SECOND LLP WITH MVA -------------------------------------//
+    
+//$$    KalmanVertexFitter theFitter_vertex_llp2_mva(kvfPSet); //One or less vertex: either Valid or NotValid /*!*/
+//$$
+    static AdaptiveVertexFitter 
+    theFitter_vertex_llp2_mva(
+                 GeometricAnnealing ( sigmacut, Tini, ratio ), 
+                 DefaultLinearizationPointFinder(),
+                 KalmanVertexUpdator<5>(), 
+                 KalmanVertexTrackCompatibilityEstimator<5>(), 
+                 KalmanVertexSmoother() );
+    theFitter_vertex_llp2_mva.setParameters ( maxshift, maxlpshift, maxstep, weightThreshold );
+//$$
+    
+    Vtx_ntk = displacedTracks_llp2_mva.size();
+    Vtx_x = -100.;
+    Vtx_y = -100.;
+    Vtx_z = -100.;
+    Vtx_chi = -1.;
+    
+    if ( Vtx_ntk > 1 )
+    {
+      TransientVertex displacedVertex_llp2_mva = theFitter_vertex_llp2_mva.vertex(displacedTracks_llp2_mva); // fitted vertex
+      
+      if ( displacedVertex_llp2_mva.isValid() ) // NotValid if the max number of steps has been exceded or the fitted position is out of tracker bounds.
+      {
+        Vtx_x = displacedVertex_llp2_mva.position().x();
+        Vtx_y = displacedVertex_llp2_mva.position().y();
+        Vtx_z = displacedVertex_llp2_mva.position().z();
+        Vtx_chi = displacedVertex_llp2_mva.normalisedChiSquared();
+      }
+    }
+
+    tree_LLP.push_back(2);
+    tree_LLP_pt.push_back(   LLP2_pt);
+    tree_LLP_eta.push_back(  LLP2_eta);
+    tree_LLP_phi.push_back(  LLP2_phi);
+    tree_LLP_x.push_back(    LLP2_x);
+    tree_LLP_y.push_back(    LLP2_y);
+    tree_LLP_z.push_back(    LLP2_z);
+    tree_LLP_nTrks.push_back(LLP2_nTrks);
+    tree_LLP_Vtx_nTrks.push_back(Vtx_ntk);
+    tree_LLP_Vtx_NChi2.push_back(Vtx_chi);
+    tree_LLP_Vtx_dx.push_back(Vtx_x - LLP2_x);
+    tree_LLP_Vtx_dy.push_back(Vtx_y - LLP2_y);
+    tree_LLP_Vtx_dz.push_back(Vtx_z - LLP2_z);
+
 //$$    KalmanVertexFitter theFitter_Vertex_Hemi1_mva(kvfPSet); //One or less vertex: either Valid or NotValid /*!*/
 //$$
     static AdaptiveVertexFitter 
@@ -2021,12 +2087,12 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
     tree_Hemi_phi.push_back(axis1_phi);
     tree_Hemi_dR.push_back(axis1_dR);
     tree_Hemi_nTrks.push_back(nTrks_axis1);
-    // tree_Hemi_nTrks_sig.push_back(nTrks_axis1_sig);
-    // tree_Hemi_nTrks_bad.push_back(nTrks_axis1_bad);
+    tree_Hemi_nTrks_sig.push_back(nTrks_axis1_sig);
+    tree_Hemi_nTrks_bad.push_back(nTrks_axis1_bad);
     tree_Hemi_Vtx_NChi2.push_back(Vtx_chi);
     tree_Hemi_Vtx_nTrks.push_back(Vtx_ntk);
-    // tree_Hemi_Vtx_nTrks_sig.push_back(nTrks_axis1_sig_mva);
-    // tree_Hemi_Vtx_nTrks_bad.push_back(nTrks_axis1_bad_mva);
+    tree_Hemi_Vtx_nTrks_sig.push_back(nTrks_axis1_sig_mva);
+    tree_Hemi_Vtx_nTrks_bad.push_back(nTrks_axis1_bad_mva);
     tree_Hemi_Vtx_x.push_back(Vtx_x);
     tree_Hemi_Vtx_y.push_back(Vtx_y);
     tree_Hemi_Vtx_z.push_back(Vtx_z);
@@ -2108,12 +2174,12 @@ void FlyingTopAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup&
     tree_Hemi_phi.push_back(axis2_phi);
     tree_Hemi_dR.push_back(axis2_dR);
     tree_Hemi_nTrks.push_back(nTrks_axis2);
-    // tree_Hemi_nTrks_sig.push_back(nTrks_axis2_sig);
-    // tree_Hemi_nTrks_bad.push_back(nTrks_axis2_bad);
+    tree_Hemi_nTrks_sig.push_back(nTrks_axis2_sig);
+    tree_Hemi_nTrks_bad.push_back(nTrks_axis2_bad);
     tree_Hemi_Vtx_NChi2.push_back(Vtx_chi);
     tree_Hemi_Vtx_nTrks.push_back(Vtx_ntk);
-    // tree_Hemi_Vtx_nTrks_sig.push_back(nTrks_axis2_sig_mva);
-    // tree_Hemi_Vtx_nTrks_bad.push_back(nTrks_axis2_bad_mva);
+    tree_Hemi_Vtx_nTrks_sig.push_back(nTrks_axis2_sig_mva);
+    tree_Hemi_Vtx_nTrks_bad.push_back(nTrks_axis2_bad_mva);
     tree_Hemi_Vtx_x.push_back(Vtx_x);
     tree_Hemi_Vtx_y.push_back(Vtx_y);
     tree_Hemi_Vtx_z.push_back(Vtx_z);
@@ -2238,7 +2304,14 @@ void FlyingTopAnalyzer::clearVariables() {
     
 //     tree_trigger_names.clear();
 //     tree_trigger_bits.clear();
-    
+        tree_PV_x.clear(); // l'index 0 donne le PV!
+    tree_PV_y.clear();
+    tree_PV_z.clear();
+    tree_PV_ez.clear();
+    tree_PV_NChi2.clear();
+    tree_PV_ndf.clear();
+
+
     tree_jet_E.clear();
     tree_jet_pt.clear();
     tree_jet_eta.clear();
@@ -2433,4 +2506,5 @@ void FlyingTopAnalyzer::clearVariables() {
     tree_Hemi_Vtx_dz.clear();
     tree_Hemi_dR12.clear();
     tree_Hemi_LLP_dR12.clear();
+    tree_track_drSig.clear();
 }
